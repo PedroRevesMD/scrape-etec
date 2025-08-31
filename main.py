@@ -1,5 +1,20 @@
 import requests
+from dataclasses import dataclass
+from typing import List
 from bs4 import BeautifulSoup
+
+
+@dataclass
+class CourseInfo:
+    title: str
+    modalities: List[str]
+    description: str
+    workload: int
+    semesters: int
+    course_area: str
+    course_field: str
+    where_to_work: str
+    where_to_study: List[str]
 
 
 def make_requests(url: str, timeout: int = 3):

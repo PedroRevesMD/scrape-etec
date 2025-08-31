@@ -8,9 +8,14 @@ def make_requests(url: str, timeout: int = 3):
     return page.text
 
 
-def parse_page(page: str) -> BeautifulSoup:
-    content = BeautifulSoup(page, "html.parser")
-    print(content.prettify())
+def parse_page(html_content: str) -> BeautifulSoup:
+    if not html_content or not html_content.strip():
+        raise ValueError("Error: HTML page cannot be empty")
+    try:
+        content = BeautifulSoup(html_content, "html.parser")
+    except Exception as e:
+        raise ValueError(f"Cannot parse website. Try Again! {e}") from e
+
     return content
 
 

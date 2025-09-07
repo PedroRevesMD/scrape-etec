@@ -1,12 +1,12 @@
 from typing import Any
-
 from .course import CourseInfo
 from src.network import make_requests
-from .utils import _get_clean_value, generate_course_url
+from .utils import generate_course_url
 from .errors import ParsingTitleError
 from bs4 import BeautifulSoup
 
 
+# TODO: Fix the scrape function to extract "Eixo Tecnologico" and course schools data
 def _parse_page(html_content: str) -> BeautifulSoup:
     return BeautifulSoup(html_content, "html.parser")
 
@@ -15,7 +15,7 @@ def scrape_all_courses(html: BeautifulSoup) -> list[dict[str, Any]]:
     courses = []
 
     course_page_elements = html.select("div.listagem-posts-conteudos")
-
+    print("Inicializando Extração das Informações...")
     for course in course_page_elements:
         title = course.select_one("h3.listagem-posts-titulo")
         if not title:
@@ -26,6 +26,7 @@ def scrape_all_courses(html: BeautifulSoup) -> list[dict[str, Any]]:
             tag.get_text(strip=True) for tag in course.select("span.term-lista-tipo")
         ]
         detailed_info = navigate_and_extract_detailed_info(title)
+        print(detailed_info)
         course_data = CourseInfo(title=title, modalities=modalities, **detailed_info)
         courses.append(course_data)
 
@@ -46,37 +47,45 @@ def scrape_specific_course_info(page: BeautifulSoup) -> dict[str, Any]:
     description = page.select_one("div.descricao-curso > p")
     details["description"] = description.get_text(strip=True) if description else ""
 
-    details["workload"] = ""
-    details["semesters"] = ""
-    details["course_field"] = ""
+    details["workload"] = "Não Informado"
+    details["semesters"] = "Não Informado"
+    details["course_field"] = "Não Informado"
 
-    course_info = page.select("div.observacoes-curso > p")
+    course_info = page.select("div.observacoes-curso > div > p")
 
-    for info in course_info:
-        text = info.get_text(strip=True)
-        if "Carga horária:" in text:
-            details["workload"] = _get_clean_value(text, "Carga horária:")
-        elif "Semestres:" in text:
-            details["semesters"] = _get_clean_value(text, "Semestres:")
-        elif "Eixo Tecnológico:" in text:
-            details["course_field"] = _get_clean_value(text, "Eixo Tecnológico:")
+    if len(course_info) > 0:
+        details["workload"] = (
+            course_info[0].get_text(strip=True).replace("Carga horária", "").strip()
+        )
 
-    work_container = page.select_one("div.right-column-cursos")
+    if len(course_info) > 1:
+        details["semesters"] = (
+            course_info[1].get_text(strip=True).replace("Semestres", "").strip()
+        )
 
-    if work_container:
-        work_paragraphs = work_container.find_all("p")
-        if len(work_paragraphs) > 0:
-            details["course_area"] = work_paragraphs[0].get_text(
-                strip=True, separator="\n"
+    if len(course_info) > 3:
+        a_tag = course_info[3].find("a")
+
+        if a_tag:
+            details["course_field"] = (
+                a_tag.get_text(strip=True).replace("Eixo tecnológico", "").strip()
             )
-        if len(work_paragraphs) > 1:
-            details["where_to_work"] = work_paragraphs[1].get_text(
-                strip=True, separator="\n"
-            )
+
+    course_text = page.select("div.right-column-cursos > p")
+
+    if len(course_text) > 0:
+        details["course_area"] = (
+            course_text[0].get_text(strip=True).replace("Área de Atuação", "").strip()
+        )
+
+    if len(course_text) > 1:
+        details["where_to_work"] = (
+            course_text[1].get_text(strip=True).replace("Onde Trabalhar:", "").strip()
+        )
 
     details["where_to_study"] = [
         tag.get_text(strip=True)
-        for tag in page.select("div.panel-presencial > span.title-unidades-cursos")
+        for tag in page.select("p.panel-presencial > a > span.title-unidades-cursos")
     ]
 
     return details

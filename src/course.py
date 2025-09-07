@@ -6,8 +6,8 @@ class CourseInfo:
     title: str
     modalities: list[str]
     description: str
-    workload: int
-    semesters: int
+    workload: str
+    semesters: str
     course_area: str
     course_field: str
     where_to_work: str

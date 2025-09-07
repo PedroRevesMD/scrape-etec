@@ -21,7 +21,3 @@ def normalize_course_name(course_name: str) -> str:
     normalized = normalized.strip("-")
 
     return normalized
-
-
-def _get_clean_value(text: str, label: str) -> str:
-    return text.replace(label, "").strip()

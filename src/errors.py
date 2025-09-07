@@ -1,0 +1,2 @@
+class ParsingTitleError(Exception):
+    pass

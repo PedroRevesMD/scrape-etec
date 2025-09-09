@@ -21,3 +21,7 @@ def normalize_course_name(course_name: str) -> str:
     normalized = normalized.strip("-")
 
     return normalized
+
+
+def remove_schools_duplicates(schools: list[str]) -> list[str]:
+    return list(set(schools))

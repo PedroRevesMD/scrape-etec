@@ -1,12 +1,11 @@
 from typing import Any
 from .course import CourseInfo
 from src.network import make_requests
-from .utils import generate_course_url
+from .utils import generate_course_url, remove_schools_duplicates
 from .errors import ParsingTitleError
 from bs4 import BeautifulSoup
 
 
-# TODO: Fix the scrape function to extract "Eixo Tecnologico" and course schools data
 def _parse_page(html_content: str) -> BeautifulSoup:
     return BeautifulSoup(html_content, "html.parser")
 
@@ -52,6 +51,7 @@ def scrape_specific_course_info(page: BeautifulSoup) -> dict[str, Any]:
     details["course_field"] = "Não Informado"
 
     course_info = page.select("div.observacoes-curso > div > p")
+    print(f"DEBUG: Encontrados {len(course_info)} elementos em course_info")
 
     if len(course_info) > 0:
         details["workload"] = (
@@ -63,8 +63,8 @@ def scrape_specific_course_info(page: BeautifulSoup) -> dict[str, Any]:
             course_info[1].get_text(strip=True).replace("Semestres", "").strip()
         )
 
-    if len(course_info) > 3:
-        a_tag = course_info[3].find("a")
+    if len(course_info) > 2:
+        a_tag = course_info[2].find("a")
 
         if a_tag:
             details["course_field"] = (
@@ -83,9 +83,8 @@ def scrape_specific_course_info(page: BeautifulSoup) -> dict[str, Any]:
             course_text[1].get_text(strip=True).replace("Onde Trabalhar:", "").strip()
         )
 
-    details["where_to_study"] = [
-        tag.get_text(strip=True)
-        for tag in page.select("p.panel-presencial > a > span.title-unidades-cursos")
+    schools = [
+        tag.get_text(strip=True) for tag in page.select("span.title-unidades-cursos")
     ]
-
+    details["where_to_study"] = remove_schools_duplicates(schools)
     return details

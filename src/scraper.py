@@ -34,6 +34,7 @@ def scrape_all_courses(html: BeautifulSoup) -> list[dict[str, Any]]:
 
 def navigate_and_extract_detailed_info(title: str):
     url = generate_course_url(title)
+    print(url)
     content = make_requests(url)
     page = _parse_page(content)
     info = scrape_specific_course_info(page)
@@ -43,12 +44,18 @@ def navigate_and_extract_detailed_info(title: str):
 def scrape_specific_course_info(page: BeautifulSoup) -> dict[str, Any]:
     details = {}
 
-    description = page.select_one("div.descricao-curso > p")
-    details["description"] = description.get_text(strip=True) if description else ""
+    description_list = page.select("div.descricao-curso > p")
+    text: list[str] = []
+    for description in description_list:
+        content = description.get_text(strip=True).strip() if description else ""
+        text.append(content)
+        details["description"] = "\n\n".join(text)
 
     details["workload"] = "Não Informado"
     details["semesters"] = "Não Informado"
     details["course_field"] = "Não Informado"
+    details["where_to_work"] = "Não Informado"
+    details["where_to_work"] = "Não Informado"
 
     course_info = page.select("div.observacoes-curso > div > p")
     print(f"DEBUG: Encontrados {len(course_info)} elementos em course_info")

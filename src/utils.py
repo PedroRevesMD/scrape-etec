@@ -2,7 +2,9 @@ import re
 import unicodedata
 
 
-def generate_course_url(title: str, base_url="https://www.cps.sp.gov.br/etec") -> str:
+def generate_course_url(
+    title: str, base_url="https://www.cps.sp.gov.br/cursos-etec"
+) -> str:
     normalized_title = normalize_course_name(title)
     return f"{base_url}/{normalized_title}"
 

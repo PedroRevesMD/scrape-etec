@@ -9,6 +9,7 @@ class CourseInfo:
     workload: str
     semesters: str
     course_area: str
+    requirements: str
     course_field: str
     where_to_work: str
     where_to_study: list[str]

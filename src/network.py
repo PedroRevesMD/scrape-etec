@@ -2,19 +2,18 @@ import requests
 import logging
 from requests.exceptions import ConnectionError, Timeout
 
+HEADERS = {
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+    "Accept": "text/html,*/*;q=0.9",
+    "Accept-Language": "pt-BR,pt;q=0.9",
+    "Accept-Encoding": "gzip, deflate",
+    "Connection": "keep-alive",
+}
 
-def make_requests(url: str, timeout: int = 60):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        "Accept-Language": "pt-BR,pt;q=0.9,en;q=0.8",
-        "Accept-Encoding": "gzip, deflate, br",
-        "DNT": "1",
-        "Connection": "keep-alive",
-        "Upgrade-Insecure-Requests": "1",
-    }
+
+def make_requests(url: str, timeout: int = 15) -> str:
     try:
-        page = requests.get(url, timeout=timeout, headers=headers)
+        page = requests.get(url, timeout=timeout, headers=HEADERS)
         page.raise_for_status()
         return page.text
     except ConnectionError:
